@@ -33,6 +33,28 @@ Here is a hypothetical example of how a model can be created to have roles.
   </code>
 </pre>
 
+  Roles access can be mixed and matched
+<pre>
+  <code>
+    class MixedRoleAccessController < ApplicationController
+
+      # Content Editor can only access the "new" action
+      grant_access_to :content_editor, :only => [:new, :create]
+
+      # Admin has access to only "destroy" but not "new", "publish" or "create"
+      grant_access_to :admin,   :only => [:destroy]
+
+      # Editor has access to "new", "publish" and "create" but not "destroy"
+      grant_access_to :editor,  :except => :destroy
+
+      def new;end
+      def create;end
+      def publish;end
+      def destroy;end
+    end
+  </code>
+</pre>
+
   You can also route around roles for entire controllers like this:
 <pre>
   <code>
@@ -45,21 +67,11 @@ Here is a hypothetical example of how a model can be created to have roles.
   Or you can designate certain actions public and certain actions role-required
   <pre>
     <code>
-      class MixedRoleAccessController < ApplicationController
-
-        # Content Editor can only access the "new" action
-        grant_access_to :content_editor, :only => [:new, :create]
-
-        # Admin has access to only "destroy" but not "new", "publish" or "create"
-        grant_access_to :admin,   :only => [:destroy]
-
-        # Editor has access to "new", "publish" and "create" but not "destroy"
-        grant_access_to :editor,  :except => :destroy
-
-        def new;end
-        def create;end
-        def publish;end
-        def destroy;end
+      class MixedAuthenticatedNonAuthenticatedActionsController < MockApplicationController
+        all_access_to :only => [:everybody_allowed]
+        grant_access_to [:admin]
+        def admin_only;end
+        def everybody_allowed;end
       end
     </code>
   </pre>
