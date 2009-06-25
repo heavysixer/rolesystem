@@ -38,7 +38,6 @@ module RoleSystem
     # which inherits from an AdminController that specifies a default role.
     def skip_role_system
       self.skipping_role_system = true
-      @roles_checked = true
     end
 
     # These actions don't require roles at all. This method is helpful for instances
@@ -82,7 +81,7 @@ module RoleSystem
 
       private
       def check_roles
-        return true if self.skipping_role_system
+        return true if self.skipping_role_system == true
         return true if no_roles_required_for(binding)
         raise RoleSystem::RoleRequired unless @role_player
         user = self.send(@role_player)

@@ -223,7 +223,7 @@ describe RoleSystem, "a controller without authenticated system", :type => :cont
   it "should just return an access denied header when authenticated_system is not available" do
     login_as('editor')
     get :index
-    response.headers['Status'].should == "401 Unauthorized"
+    response.status.should == "401 Unauthorized"
   end
 end
 
