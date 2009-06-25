@@ -232,6 +232,7 @@ class MixedAuthenticatedNonAuthenticatedActionsController < MockApplicationContr
   grant_access_to [:admin]
   def admin_only;end
   def everybody_allowed;end
+  def nobody_allowed;end
 end
 
 describe RoleSystem, "a controller where only certain actions require roles", :type => :controller do
@@ -248,12 +249,18 @@ describe RoleSystem, "a controller where only certain actions require roles", :t
 
     get :everybody_allowed
     response.should be_success
+
+    get :nobody_allowed
+    response.should be_success
   end
 
   it "should allow members without a role or without being logged in to access public actions" do
 
     # No session at all
     get :admin_only
+    response.should redirect_to('/')
+
+    get :nobody_allowed
     response.should redirect_to('/')
 
     get :everybody_allowed

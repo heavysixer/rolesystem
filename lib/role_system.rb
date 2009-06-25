@@ -48,7 +48,10 @@ module RoleSystem
         self.public_actions = [options[:only]].flatten.compact.collect{ |a| a.to_sym }
       end
       if options.has_key?(:except)
-        self.private_actions = [options[:except]].flatten.compact.collect{ |a| a.to_sym }
+        instance_methods_array = instance_methods(false).collect{ |a| a.to_sym }
+        opts = [options[:except]].flatten.compact.collect{ |a| a.to_sym }
+        self.public_actions =  opts - instance_methods_array
+        self.private_actions = opts
       end
     end
 
