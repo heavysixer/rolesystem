@@ -22,8 +22,12 @@ class MockApplicationController < ActionController::Base
   before_filter { |controller| controller.role_player = :current_member }
 
   def access_denied
-    redirect_to new_sessions_path and return false
+    redirect_to '/' and return false
   end
+end
+
+class Group
+  attr :name, :context
 end
 
 module RoleSystemSpecHelper
@@ -62,7 +66,7 @@ describe RoleSystem, "a controller allowing only admin access", :type => :contro
   it "should prevent access by anyone who is not an admin" do
     login_as('editor')
     get :index
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
   end
 end
 
@@ -70,9 +74,14 @@ class PublicController < AdminOnlyController
   skip_role_system
 end
 
-describe RoleSystem, "a controller skipping the role system of an inherited controller" do
-  get :index
-  response.should be_success
+describe RoleSystem, "a controller skipping the role system of an inherited controller", :type => :controller do
+  include RoleSystemSpecHelper
+  controller_name :public
+
+  it "should allow access to the normally protected method" do
+    get :index
+    response.should be_success
+  end
 end
 
 class MixedRoleAccessController < MockApplicationController
@@ -111,7 +120,7 @@ describe RoleSystem, "a controller allowing access to actions by role", :type =>
   it "should only give destroy access to admin" do
     login_as('editor')
     get :destroy
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     login_as('admin')
     get :destroy
@@ -121,7 +130,7 @@ describe RoleSystem, "a controller allowing access to actions by role", :type =>
   it "should not give access to index to admin" do
     login_as('admin')
     get :index
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
   end
 end
 
@@ -145,13 +154,13 @@ describe RoleSystem, "a controller allowing access under certain conditions", :t
     response.should be_success
 
     get :index, :admin_sekret => 'shhhhhhhhhhhhhhh'
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
   end
 
   it "should allow access to content_editors if special access is granted" do
     login_as('content_editor')
     get :index
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     get :index, :sekret => 'shhhhhhhhhhhhhhh'
     response.should be_success
@@ -186,14 +195,14 @@ describe RoleSystem, "a controller where two roles are equivalent", :type => :co
     response.should be_success
 
     get :new
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     login_as('content_editor')
     get :index
     response.should be_success
 
     get :new
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
   end
 end
 
@@ -245,14 +254,14 @@ describe RoleSystem, "a controller where only certain actions require roles", :t
 
     # No session at all
     get :admin_only
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     get :everybody_allowed
     response.should be_success
 
     login_as('editor')
     get :admin_only
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     get :everybody_allowed
     response.should be_success
@@ -286,14 +295,14 @@ describe RoleSystem, "another controller where only certain actions require role
 
     # No session at all
     get :nobody_allowed
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     get :everybody_allowed
     response.should be_success
 
     login_as('editor')
     get :nobody_allowed
-    response.should redirect_to(new_sessions_path)
+    response.should redirect_to('/')
 
     get :everybody_allowed
     response.should be_success
